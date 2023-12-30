@@ -1,0 +1,26 @@
+version: '3.3'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    tty: true
+    command: sh -c "poetry run uvicorn api.main:app --host 0.0.0.0 --reload"
+    volumes:
+      - ./backend/app:/app
+      - ./.git:/app/.git
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    tty: true
+    command: sh -c "yarn dev"
+    volumes:
+      - ./frontend/app:/app 
+      - ./.git:/app/.git
