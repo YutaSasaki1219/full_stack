@@ -5,14 +5,30 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    depends_on:
+      - db
     ports:
       - "8000:8000"
-    expose:
-      - 8000
     tty: true
-    # command: sh -c "poetry run uvicorn api.main:app --host 0.0.0.0 --reload"
+    # command: sh -c "poetry run uvicorn app.main:app --host 0.0.0.0 --reload"
     volumes:
       - ./backend/app:/app
+  db:
+    image: postgres:12
+    volumes:
+      - app-db-data:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+    env_file:
+      - .env
   frontend:
     build:
       context: ./frontend
@@ -23,3 +39,5 @@ services:
     # command: sh -c "yarn dev"
     volumes:
       - ./frontend/app:/app 
+volumes:
+  app-db-data:
