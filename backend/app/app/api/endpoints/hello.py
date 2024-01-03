@@ -5,11 +5,11 @@ from app.models.hello import Hello, HelloOut
 
 router = APIRouter()
 
-@router.get("/api/hello/backend")
+@router.get("/api/hello/backend/")
 async def hello():
     return {"message": "backend"}
 
-@router.get("/api/hello_db/backend", response_model=HelloOut)
+@router.get("/api/hello_db/backend/", response_model=HelloOut)
 async def hello_db(session: SessionDep, id:int = 1) -> Any:
     hello = session.get(Hello, id)
     if not hello:
