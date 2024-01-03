@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.api.api import api_router
 
 app = FastAPI()
 
@@ -13,6 +14,4 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_headers=["*"],
     ),
 
-@app.get("/api/hello/backend")
-async def hello():
-    return {"message": "backend"}
+app.include_router(api_router)

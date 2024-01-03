@@ -1,12 +1,13 @@
-
-from pydantic import BaseSettings, PostgresDsn
-
+from typing import List, Union
+from pydantic import PostgresDsn, AnyHttpUrl, field_validator
+from pydantic_settings import BaseSettings 
 
 class Settings(BaseSettings):
 
     # CORS
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
-    @validator("BACKEND_CORS_ORIGINS", pre=True)
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
     def assemble_cors_origins(cls, v):
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
@@ -17,17 +18,18 @@ class Settings(BaseSettings):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
-    SQLALCHEMY_DATABASE_URI: PostgresDsn = None
-    @validator("SQLALCHEMY_DATABASE_URI", pre=True)
+    SQLALCHEMY_DATABASE_URI: Union[PostgresDsn, str] = None
+    @field_validator("SQLALCHEMY_DATABASE_URI", mode="before")
+    @classmethod
     def assemble_db_connection(cls, v, values):
         if isinstance(v, str):
             return v
         return PostgresDsn.build(
             scheme="postgresql",
-            user=values.get("POSTGRES_USER"),
-            password=values.get("POSTGRES_PASSWORD"),
-            host=values.get("POSTGRES_SERVER"),
-            path=f"/{values.get('POSTGRES_DB') or ''}",
+            username=values.data.get("POSTGRES_USER"),
+            password=values.data.get("POSTGRES_PASSWORD"),
+            host=values.data.get("POSTGRES_SERVER"),
+            path=f"{values.data.get('POSTGRES_DB') or ''}",
         )
     
     class Config:
